@@ -7,7 +7,7 @@ def normalize(arr, _n_stars):
 
 class Naive_Bayes:
 	def __init__(self):
-		self.ratings = inputparser.get_data()
+		self.movies, self.ratings = inputparser.get_data()
 
 		self.genre_freq = {}
 		self.age_freq = {}
@@ -41,19 +41,22 @@ class Naive_Bayes:
 		# normalize(self.genre_freq, self.n_stars)
 		# normalize(self.ocupation_freq, self.n_stars)
 	
-	def query(self, genre, age, gender, ocupation):
+	def query(self, movie_id, age, gender, ocupation):
+		genres = self.movies[movie_id].genre
 		probs = [1]*5
 		tot_rats = sum(self.n_stars)
 		tot_oc = sum(self.ocupation_freq[ocupation])
 		tot_gender = sum(self.gender_freq[gender])
-		tot_genre = sum(self.genre_freq[genre])
+		tot_genre = {genre: sum(self.genre_freq[genre]) for genre in genres}
 		tot_age = sum(self.age_freq[age])
 		for ind, _ in enumerate(probs):
 			# P(R|X) = P(X|R)*P(R)/P(X)
-			probs[ind] *= (self.ocupation_freq[ocupation][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(tot_oc/tot_rats)
-			probs[ind] *= (self.gender_freq[gender][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(tot_gender/tot_rats)
-			probs[ind] *= (self.age_freq[age][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(tot_age/tot_rats)
-			probs[ind] *= (self.genre_freq[genre][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(tot_genre/tot_rats)
+			probs[ind] *= (self.ocupation_freq[ocupation][ind]/self.n_stars[ind])/(tot_oc/tot_rats)
+			probs[ind] *= (self.gender_freq[gender][ind]/self.n_stars[ind])/(tot_gender/tot_rats)
+			probs[ind] *= (self.age_freq[age][ind]/self.n_stars[ind])/(tot_age/tot_rats)
+			for genre in genres:
+				probs[ind] *= (self.genre_freq[genre][ind]/self.n_stars[ind])/(tot_genre[genre]/tot_rats)
+			probs[ind] *= (self.n_stars[ind]/tot_rats)
 		return probs
 
 	def priori_query(self, movie_id):
@@ -67,5 +70,16 @@ class Naive_Bayes:
 
 if __name__ == "__main__":
 	nb = Naive_Bayes()
-	print(nb.query("Comedy", 1, "F", 10))
-	pass
+	ids = [3948, 1, 2, 110, 253, 262, 296, 317, 364, 362]
+	for id in ids:
+		result = nb.query(id , 18, "F", 4)
+		sum_res = sum(result)
+		curr_max_w = 0
+		predicted = 0
+		for star, wheight in enumerate(result):
+			if curr_max_w < wheight:	
+				curr_max_w = wheight
+				predicted = star + 1
+		priori_res = nb.priori_query(id)
+		print(nb.movies[id].name, ". Bayes:", predicted, ", Priori: ", priori_res ,"\n")
+		# print(nb.movies[id].name, result, sum(result))

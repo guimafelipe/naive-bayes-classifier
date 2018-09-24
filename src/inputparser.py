@@ -13,7 +13,7 @@ def get_data():
 	users = {int (user[0]): User(int(user[0]), user[1], int(user[2]), int(user[3])) for user in load_db("ml-1m/users.dat")}
 	ratings = [Rating(users[int(rate[0])], movies[int(rate[1])], int(rate[2])) for rate in load_db("ml-1m/ratings.dat")]
 
-	return ratings
+	return movies, ratings
 
 if __name__ == "__main__":
 	# ratings = load_db("ml-1m/ratings.dat")
