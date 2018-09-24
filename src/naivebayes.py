@@ -1,9 +1,4 @@
-import inputparser
-
-def normalize(arr, _n_stars):
-	for key in arr:
-		for ind, el in enumerate(arr[key]):
-			arr[key][ind] = el/_n_stars[ind]
+import src.inputparser as inputparser
 
 class Naive_Bayes:
 	def __init__(self):
@@ -35,17 +30,12 @@ class Naive_Bayes:
 			if _ocupation not in self.ocupation_freq:
 				self.ocupation_freq[_ocupation] = [0]*5
 			self.ocupation_freq[_ocupation][_stars] += 1
-		
-		# normalize(self.gender_freq, self.n_stars)
-		# normalize(self.age_freq, self.n_stars)
-		# normalize(self.genre_freq, self.n_stars)
-		# normalize(self.ocupation_freq, self.n_stars)
-	
+
 	def query(self, movie_id, age, gender, ocupation):
 		genres = self.movies[movie_id].genre
 		probs = [1]*5
-		tot_rats = sum(self.n_stars)
 		tot_oc = sum(self.ocupation_freq[ocupation])
+		tot_rats = sum(self.n_stars)
 		tot_gender = sum(self.gender_freq[gender])
 		tot_genre = {genre: sum(self.genre_freq[genre]) for genre in genres}
 		tot_age = sum(self.age_freq[age])
