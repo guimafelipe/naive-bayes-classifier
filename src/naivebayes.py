@@ -1,33 +1,58 @@
 import inputparser
 
+def normalize(arr, _n_stars):
+	for key in arr:
+		for ind, el in enumerate(arr[key]):
+			arr[key][ind] = el/_n_stars[ind]
+
+class Naive_Bayes:
+	def __init__(self):
+		self.ratings = inputparser.get_data()
+
+		self.genre_freq = {}
+		self.age_freq = {}
+		self.gender_freq = {}
+		self.ocupation_freq = {}
+		
+		self.n_stars = [0]*5
+
+		for rate in self.ratings:
+			_stars = rate.stars - 1
+			self.n_stars[_stars] += 1
+			for genr in rate.movie.genre:
+				if genr not in self.genre_freq:
+					self.genre_freq[genr] = [0]*5
+				self.genre_freq[genr][_stars] += 1
+			_age = rate.user.age
+			if _age not in self.age_freq:
+				self.age_freq[_age] = [0]*5
+			self.age_freq[_age][_stars] += 1
+			_gender = rate.user.gender
+			if _gender not in self.gender_freq:
+				self.gender_freq[_gender] = [0]*5 
+			self.gender_freq[_gender][_stars] += 1
+			_ocupation = rate.user.ocupation
+			if _ocupation not in self.ocupation_freq:
+				self.ocupation_freq[_ocupation] = [0]*5
+			self.ocupation_freq[_ocupation][_stars] += 1
+		
+		# normalize(self.gender_freq, self.n_stars)
+		# normalize(self.age_freq, self.n_stars)
+		# normalize(self.genre_freq, self.n_stars)
+		# normalize(self.ocupation_freq, self.n_stars)
+	
+	def query(self, genre, age, gender, ocupation):
+		probs = [1]*5
+		tot_rats = sum(self.n_stars)
+		for ind, _ in enumerate(probs):
+			probs[ind] *= (self.ocupation_freq[ocupation][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(sum(self.ocupation_freq[ocupation])/tot_rats)
+			probs[ind] *= (self.gender_freq[gender][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(sum(self.gender_freq[gender])/tot_rats)
+			probs[ind] *= (self.age_freq[age][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(sum(self.age_freq[age])/tot_rats)
+			probs[ind] *= (self.genre_freq[genre][ind]/self.n_stars[ind])*(self.n_stars[ind]/tot_rats)/(sum(self.genre_freq[genre])/tot_rats)
+		return probs
+
+
 if __name__ == "__main__":
-    ratings = inputparser.get_data()
-
-    genre_freq = {}
-    age_freq = {}
-    gender_freq = {}
-    ocupation_freq = {}
-    
-    for rate in ratings:
-        _stars = rate.stars - 1
-        for genr in rate.movie.genre:
-            if genr not in genre_freq:
-                genre_freq[genr] = [0]*5
-            genre_freq[genr][_stars] += 1
-        _age = rate.user.age
-        if _age not in age_freq:
-            age_freq[_age] = [0]*5
-        age_freq[_age][_stars] += 1
-        _gender = rate.user.gender
-        if _gender not in gender_freq:
-           gender_freq[_gender] = [0]*5 
-        gender_freq[_gender][_stars] += 1
-        _ocupation = rate.user.ocupation
-        if _ocupation not in ocupation_freq:
-            ocupation_freq[_ocupation] = [0]*5
-        ocupation_freq[_ocupation][_stars] += 1
-
-    print(genre_freq)
-    print(gender_freq)
-    print(age_freq)
-    print(ocupation_freq)
+	nb = Naive_Bayes()
+	print(nb.query("Comedy", 1, "F", 10))
+	pass
